@@ -5,13 +5,15 @@ import scalariform.formatter.preferences._
 
 name := "stateful-gather"
 
-version := "1.4-SNAPSHOT"
+version := "0.2.0"
 
 val reactiveMongoVersion = "0.11.7.play24"
 
 val akkaV = "2.4.0"
 
 scalaVersion := "2.11.7"
+
+val gitHeadCommitSha = settingKey[String]("current git commit SHA")
 
 val commonScalariform = scalariformSettings :+ (ScalariformKeys.preferences := ScalariformKeys.preferences.value
   .setPreference(AlignParameters, true)
@@ -21,14 +23,17 @@ val commonScalariform = scalariformSettings :+ (ScalariformKeys.preferences := S
   .setPreference(RewriteArrowSymbols, true))
 
 val commons = Seq(
-  organization := "me.passenger",
+  organization := "ru.unicorndev",
   scalaVersion := "2.11.7",
   resolvers ++= Seq(
-    "dgtl" at "http://dev.dgtl.pro/repo/",
     "Typesafe Repo" at "http://repo.typesafe.com/typesafe/releases/",
-    Resolver.sonatypeRepo("snapshots")
+    Resolver.sonatypeRepo("snapshots"),
+    Resolver.bintrayRepo("alari", "generic")
   ),
-  publishTo := Some(Resolver.file("file", new File("/mvn-repo")))
+  gitHeadCommitSha in ThisBuild := Process("git rev-parse --short HEAD").lines.head,
+  licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
+  bintrayPackageLabels := Seq("scala", "play", "api"),
+  bintrayRepository := "generic"
 ) ++ commonScalariform
 
 commons
@@ -38,7 +43,7 @@ lazy val `stateful-gather` = (project in file("."))
   .aggregate(`stateful`)
 
 lazy val `eventbus` = (project in file("eventbus")).settings(commons: _*).settings(
-  version := "0.2.0",
+  version := "0.2.1",
   libraryDependencies ++= Seq(
     "com.typesafe.akka" %% "akka-actor" % akkaV % Provided,
     "com.google.inject" % "guice" % "4.0" % Provided,
@@ -47,7 +52,7 @@ lazy val `eventbus` = (project in file("eventbus")).settings(commons: _*).settin
 )
 
 lazy val `stateful` = (project in file("stateful")).settings(commons: _*).settings(
-  version := "0.2.6",
+  version := "0.2.7",
   libraryDependencies ++= Seq(
     "com.github.scullxbones" %% "akka-persistence-mongo-rxmongo" % "1.0.6",
     "org.reactivemongo" %% "play2-reactivemongo" % reactiveMongoVersion,
@@ -56,7 +61,9 @@ lazy val `stateful` = (project in file("stateful")).settings(commons: _*).settin
     "joda-time" % "joda-time" % "2.8.1" % Provided,
     "org.joda" % "joda-convert" % "1.7" % Provided
   )
-).dependsOn(`eventbus`)
+)
+  .dependsOn(`eventbus`)
+  .aggregate(`eventbus`)
 
 offline := true
 
