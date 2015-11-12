@@ -27,6 +27,7 @@ val commons = Seq(
   scalaVersion := "2.11.7",
   resolvers ++= Seq(
     "Typesafe Repo" at "http://repo.typesafe.com/typesafe/releases/",
+    "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
     Resolver.sonatypeRepo("snapshots"),
     Resolver.bintrayRepo("alari", "generic")
   ),
