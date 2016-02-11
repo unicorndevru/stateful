@@ -1,6 +1,6 @@
-package psgr.stateful
+package stateful
 
-import akka.actor._
+import akka.actor.{ Actor, ActorLogging, ReceiveTimeout, Stash }
 
 trait Lockable extends Stash {
   it: Actor with ActorLogging ⇒

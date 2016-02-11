@@ -1,6 +1,6 @@
-package psgr.stateful.commands
+package stateful.commands
 
-import psgr.stateful.ActiveStateful
+import stateful.ActiveStateful
 
 import scala.collection.GenSetLike
 

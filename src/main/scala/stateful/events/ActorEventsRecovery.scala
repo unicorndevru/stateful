@@ -1,9 +1,8 @@
-package psgr.stateful.events
+package stateful.events
 
 import akka.persistence.RecoveryCompleted
 import org.joda.time.DateTime
-import psgr.eventbus.ModelEvent
-import psgr.stateful.{ ActiveStateful, PersistentBson }
+import stateful.{ ModelEvent, PersistentBson, ActiveStateful }
 
 trait ActorEventsRecovery[A <: ActiveStateful] {
   it: PersistentBson ⇒

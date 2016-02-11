@@ -1,9 +1,8 @@
-package psgr.stateful
+package stateful
 
 import org.joda.time.DateTime
-import psgr.eventbus.ModelEvent
-import psgr.stateful.commands.ActorCommandsHandler
-import psgr.stateful.events.ActorEventsRecovery
+import stateful.commands.ActorCommandsHandler
+import stateful.events.ActorEventsRecovery
 
 trait StatefulActor[A <: ActiveStateful] extends PersistentBson with ActorCommandsHandler[A] with ActorEventsRecovery[A] {
   var currentDataOpt: Option[active.Data] = None

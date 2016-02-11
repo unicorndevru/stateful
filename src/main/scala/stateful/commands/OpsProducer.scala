@@ -1,8 +1,7 @@
-package psgr.stateful.commands
+package stateful.commands
 
-import psgr.eventbus.ModelEvent
-import psgr.stateful.ActiveStateful
-import psgr.stateful.events.PersistentEvent
+import stateful.{ ModelEvent, ActiveStateful }
+import stateful.events.PersistentEvent
 
 import scala.concurrent.Future
 import scala.language.implicitConversions

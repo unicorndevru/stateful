@@ -1,7 +1,6 @@
-package psgr.stateful.events
+package stateful.events
 
-import psgr.eventbus.ModelEvent
-import psgr.stateful.ActiveStateful
+import stateful.{ ModelEvent, ActiveStateful }
 
 sealed trait PersistentEvent[A <: ActiveStateful]
 

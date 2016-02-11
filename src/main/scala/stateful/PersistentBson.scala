@@ -1,4 +1,4 @@
-package psgr.stateful
+package stateful
 
 import akka.actor.ActorLogging
 import akka.persistence.RecoveryCompleted

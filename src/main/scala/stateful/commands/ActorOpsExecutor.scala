@@ -1,11 +1,9 @@
-package psgr.stateful.commands
+package stateful.commands
 
 import akka.actor.Status
 import org.joda.time.DateTime
-import psgr.eventbus.ModelEvent
-import psgr.stateful.events.{ WithDomainEvent, PersistentEvent }
-import psgr.stateful.{ LocalEmitter, ActiveStateful, Lockable, PersistentBson }
-
+import stateful._
+import stateful.events.{ WithDomainEvent, PersistentEvent }
 import scala.reflect.ClassTag
 
 trait ActorOpsExecutor[A <: ActiveStateful] extends OpsProducer[A] with PersistentBson with Lockable {
@@ -44,13 +42,13 @@ trait ActorOpsExecutor[A <: ActiveStateful] extends OpsProducer[A] with Persiste
         }
         active.lenses.foreach { l ⇒
           type M = l.Model with Product
-          em.emitterBus.emitEvent[M](
+          /*TODO: em.emitterBus.emitEvent[M](
             None,
             dataBefore.flatMap(l.f).asInstanceOf[Option[M]],
             currentDataOpt.flatMap(l.f).asInstanceOf[Option[M]]
-          )(l.tag.asInstanceOf[ClassTag[M]])
+          )(l.tag.asInstanceOf[ClassTag[M]])*/
         }
-        em.emitterBus.emitEvent[A#Model](event, dataBefore.map(active.model), currentDataOpt.map(active.model))(active.modelTag.asInstanceOf[ClassTag[A#Model]])
+      // TODO: em.emitterBus.emitEvent[A#Model](event, dataBefore.map(active.model), currentDataOpt.map(active.model))(active.modelTag.asInstanceOf[ClassTag[A#Model]])
     }
   }
 

@@ -1,4 +1,4 @@
-package psgr.stateful
+package stateful
 
 import scala.reflect.ClassTag
 

@@ -5,11 +5,9 @@ import scalariform.formatter.preferences._
 
 name := "stateful-gather"
 
-version := "0.2.0"
-
 val reactiveMongoVersion = "0.11.7.play24"
 
-val akkaV = "2.4.0"
+val akkaV = "2.4.1"
 
 scalaVersion := "2.11.7"
 
@@ -34,28 +32,16 @@ val commons = Seq(
   gitHeadCommitSha in ThisBuild := Process("git rev-parse --short HEAD").lines.head,
   licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
   bintrayPackageLabels := Seq("scala", "play", "api"),
-  bintrayRepository := "generic"
+  bintrayRepository := "generic",
+  version := "0.1."+gitHeadCommitSha.value
 ) ++ commonScalariform
 
 commons
 
-lazy val `stateful-gather` = (project in file("."))
-  .dependsOn(`stateful`)
-  .aggregate(`stateful`)
-
-lazy val `eventbus` = (project in file("eventbus")).settings(commons: _*).settings(
-  version := "0.2.1",
-  libraryDependencies ++= Seq(
-    "com.typesafe.akka" %% "akka-actor" % akkaV % Provided,
-    "com.google.inject" % "guice" % "4.0" % Provided,
-    "org.specs2" %% "specs2-core" % "3.6" % Test
-  )
-)
-
-lazy val `stateful` = (project in file("stateful")).settings(commons: _*).settings(
+lazy val `stateful` = (project in file(".")).settings(commons: _*).settings(
   version := "0.2.7",
   libraryDependencies ++= Seq(
-    "com.github.scullxbones" %% "akka-persistence-mongo-rxmongo" % "1.0.6",
+    "com.github.scullxbones" %% "akka-persistence-mongo-rxmongo" % "1.1.10",
     "org.reactivemongo" %% "play2-reactivemongo" % reactiveMongoVersion,
     "com.typesafe.akka" %% "akka-persistence" % akkaV,
     "com.google.inject" % "guice" % "4.0" % Provided,
@@ -63,8 +49,6 @@ lazy val `stateful` = (project in file("stateful")).settings(commons: _*).settin
     "org.joda" % "joda-convert" % "1.7" % Provided
   )
 )
-  .dependsOn(`eventbus`)
-  .aggregate(`eventbus`)
 
 offline := true
 

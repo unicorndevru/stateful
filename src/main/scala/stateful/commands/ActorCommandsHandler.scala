@@ -1,7 +1,7 @@
-package psgr.stateful.commands
+package stateful.commands
 
 import akka.actor.Status
-import psgr.stateful.{ PersistentBson, ActiveStateful }
+import stateful.{ PersistentBson, ActiveStateful }
 
 trait ActorCommandsHandler[A <: ActiveStateful] extends ActorOpsExecutor[A] {
   it: PersistentBson ⇒
