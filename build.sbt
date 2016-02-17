@@ -3,9 +3,9 @@ import sbt.Keys._
 
 import scalariform.formatter.preferences._
 
-name := "stateful-gather"
+name := "stateful"
 
-val reactiveMongoVersion = "0.11.7.play24"
+val reactiveMongoVersion = "0.11.6"
 
 val akkaV = "2.4.1"
 
@@ -30,10 +30,10 @@ val commons = Seq(
     Resolver.bintrayRepo("alari", "generic")
   ),
   gitHeadCommitSha in ThisBuild := Process("git rev-parse --short HEAD").lines.head,
-  licenses += ("MIT", url("http://opensource.org/licenses/MIT")),
+  licenses +=("MIT", url("http://opensource.org/licenses/MIT")),
   bintrayPackageLabels := Seq("scala", "play", "api"),
   bintrayRepository := "generic",
-  version := "0.1."+gitHeadCommitSha.value
+  version := "0.1." + gitHeadCommitSha.value
 ) ++ commonScalariform
 
 commons
@@ -42,11 +42,15 @@ lazy val `stateful` = (project in file(".")).settings(commons: _*).settings(
   version := "0.2.7",
   libraryDependencies ++= Seq(
     "com.github.scullxbones" %% "akka-persistence-mongo-rxmongo" % "1.1.10",
-    "org.reactivemongo" %% "play2-reactivemongo" % reactiveMongoVersion,
+    "org.reactivemongo" %% "reactivemongo" % reactiveMongoVersion,
     "com.typesafe.akka" %% "akka-persistence" % akkaV,
-    "com.google.inject" % "guice" % "4.0" % Provided,
     "joda-time" % "joda-time" % "2.8.1" % Provided,
-    "org.joda" % "joda-convert" % "1.7" % Provided
+    "org.joda" % "joda-convert" % "1.7" % Provided,
+    "org.slf4j" % "slf4j-simple" % "1.7.12" % Test,
+    "com.typesafe.akka" %% "akka-testkit" % akkaV % Test,
+    "org.scalatest" %% "scalatest" % "2.2.5" % Test,
+    "junit" % "junit" % "4.12" % Test,
+    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "1.50.1" % Test
   )
 )
 
@@ -57,8 +61,6 @@ offline := true
 resolvers += Resolver.sonatypeRepo("releases")
 
 resolvers += Resolver.jcenterRepo
-
-testOptions in Test += Tests.Argument("junitxml")
 
 parallelExecution in Test := false
 
