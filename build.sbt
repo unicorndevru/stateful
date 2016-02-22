@@ -5,9 +5,9 @@ import scalariform.formatter.preferences._
 
 name := "stateful"
 
-val reactiveMongoVersion = "0.11.6"
+val reactiveMongoVersion = "0.11.10"
 
-val akkaV = "2.4.1"
+val akkaV = "2.4.2"
 
 scalaVersion := "2.11.7"
 
@@ -33,15 +33,14 @@ val commons = Seq(
   licenses +=("MIT", url("http://opensource.org/licenses/MIT")),
   bintrayPackageLabels := Seq("scala", "play", "api"),
   bintrayRepository := "generic",
-  version := "0.1." + gitHeadCommitSha.value
+  version := "0.4." + gitHeadCommitSha.value
 ) ++ commonScalariform
 
 commons
 
 lazy val `stateful` = (project in file(".")).settings(commons: _*).settings(
-  version := "0.2.7",
   libraryDependencies ++= Seq(
-    "com.github.scullxbones" %% "akka-persistence-mongo-rxmongo" % "1.1.10",
+    "com.github.scullxbones" %% "akka-persistence-mongo-rxmongo" % "1.2.0",
     "org.reactivemongo" %% "reactivemongo" % reactiveMongoVersion,
     "com.typesafe.akka" %% "akka-persistence" % akkaV,
     "joda-time" % "joda-time" % "2.8.1" % Provided,
@@ -50,7 +49,7 @@ lazy val `stateful` = (project in file(".")).settings(commons: _*).settings(
     "com.typesafe.akka" %% "akka-testkit" % akkaV % Test,
     "org.scalatest" %% "scalatest" % "2.2.5" % Test,
     "junit" % "junit" % "4.12" % Test,
-    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "1.50.1" % Test
+    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "1.50.2" % Test
   )
 )
 
