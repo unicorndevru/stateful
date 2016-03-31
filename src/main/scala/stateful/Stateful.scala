@@ -47,12 +47,16 @@ trait Stateful extends PersistentActor with ActorLogging with Lockable {
         val changedState = c.applyChange(state).asInstanceOf[c.State]
         if (changedState == state) {
           sender() ! changeDef.lens.resp()
-        } else persist(BSONDocument(Traversable(
-          changeDef.name → changeDef.handler.asInstanceOf[BSONHandler[_, c.type]].write(c).asInstanceOf[BSONValue],
-          TimestampFieldname → BSONDateTime(System.currentTimeMillis())
-        ))) { _ ⇒
-          changeDef.lens.set(changedState)
-          sender() ! changeDef.lens.resp()
+        } else {
+          val ts = System.currentTimeMillis()
+          persist(BSONDocument(Traversable(
+            changeDef.name → changeDef.handler.asInstanceOf[BSONHandler[_, c.type]].write(c).asInstanceOf[BSONValue],
+            TimestampFieldname → BSONDateTime(ts)
+          ))) { _ ⇒
+            _timestamp = new DateTime(ts)
+            changeDef.lens.set(changedState)
+            sender() ! changeDef.lens.resp()
+          }
         }
       }
 
@@ -63,7 +67,7 @@ trait Stateful extends PersistentActor with ActorLogging with Lockable {
 
   override def receiveRecover = {
     case doc: BSONDocument ⇒
-      doc.elements.toSeq.foreach {
+      doc.elements.foreach {
         case (`TimestampFieldname` | `LegacyTimestampFieldname`, BSONDateTime(t)) ⇒
           _timestamp = new DateTime(t)
 

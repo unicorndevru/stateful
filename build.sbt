@@ -9,7 +9,7 @@ val reactiveMongoVersion = "0.11.10"
 
 val akkaV = "2.4.2"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
 val gitHeadCommitSha = settingKey[String]("current git commit SHA")
 
