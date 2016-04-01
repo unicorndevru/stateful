@@ -1,8 +1,9 @@
 package stateful
 
-import akka.actor.{ Status, ActorLogging }
-import org.joda.time.DateTime
-import reactivemongo.bson.{ BSONDateTime, BSONDocument, BSONHandler, BSONValue }
+import java.time.Instant
+
+import akka.actor.{ActorLogging, Status}
+import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONHandler, BSONValue}
 import akka.persistence.PersistentActor
 
 trait Stateful extends PersistentActor with ActorLogging with Lockable {
@@ -31,9 +32,9 @@ trait Stateful extends PersistentActor with ActorLogging with Lockable {
   private val TimestampFieldname = "_t"
   private val LegacyTimestampFieldname = "_timestamp"
 
-  private[this] var _timestamp: DateTime = null
+  private[this] var _timestamp: Instant = null
 
-  def lastTimestamp: DateTime = _timestamp
+  def lastTimestamp: Instant = _timestamp
 
   def receiveCustom: Receive = PartialFunction.empty
 
@@ -48,12 +49,12 @@ trait Stateful extends PersistentActor with ActorLogging with Lockable {
         if (changedState == state) {
           sender() ! changeDef.lens.resp()
         } else {
-          val ts = System.currentTimeMillis()
+          val ts = Instant.now()
           persist(BSONDocument(Traversable(
             changeDef.name → changeDef.handler.asInstanceOf[BSONHandler[_, c.type]].write(c).asInstanceOf[BSONValue],
-            TimestampFieldname → BSONDateTime(ts)
+            TimestampFieldname → BSONDateTime(ts.toEpochMilli)
           ))) { _ ⇒
-            _timestamp = new DateTime(ts)
+            _timestamp = ts
             changeDef.lens.set(changedState)
             sender() ! changeDef.lens.resp()
           }
@@ -69,7 +70,7 @@ trait Stateful extends PersistentActor with ActorLogging with Lockable {
     case doc: BSONDocument ⇒
       doc.elements.foreach {
         case (`TimestampFieldname` | `LegacyTimestampFieldname`, BSONDateTime(t)) ⇒
-          _timestamp = new DateTime(t)
+          _timestamp = Instant.ofEpochMilli(t)
 
         case (k, v) if changeEventDefs.contains(k) ⇒
           val changeDef = changeEventDefs(k).typed

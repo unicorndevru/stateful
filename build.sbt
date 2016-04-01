@@ -43,8 +43,6 @@ lazy val `stateful` = (project in file(".")).settings(commons: _*).settings(
     "com.github.scullxbones" %% "akka-persistence-mongo-rxmongo" % "1.2.0",
     "org.reactivemongo" %% "reactivemongo" % reactiveMongoVersion,
     "com.typesafe.akka" %% "akka-persistence" % akkaV,
-    "joda-time" % "joda-time" % "2.8.1" % Provided,
-    "org.joda" % "joda-convert" % "1.7" % Provided,
     "org.slf4j" % "slf4j-simple" % "1.7.12" % Test,
     "com.typesafe.akka" %% "akka-testkit" % akkaV % Test,
     "org.scalatest" %% "scalatest" % "2.2.5" % Test,
