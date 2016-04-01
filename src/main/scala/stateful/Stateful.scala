@@ -2,8 +2,8 @@ package stateful
 
 import java.time.Instant
 
-import akka.actor.{ActorLogging, Status}
-import reactivemongo.bson.{BSONDateTime, BSONDocument, BSONHandler, BSONValue}
+import akka.actor.{ ActorLogging, Status }
+import reactivemongo.bson.{ BSONDateTime, BSONDocument, BSONHandler, BSONValue }
 import akka.persistence.PersistentActor
 
 trait Stateful extends PersistentActor with ActorLogging with Lockable {
