@@ -5,7 +5,7 @@ import scalariform.formatter.preferences._
 
 name := "stateful"
 
-val reactiveMongoVersion = "0.11.10"
+val reactiveMongoVersion = "0.11.9"
 
 val akkaV = "2.4.3"
 
