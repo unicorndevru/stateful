@@ -15,14 +15,14 @@ trait Stateful extends PersistentActor with ActorLogging with Lockable {
   protected class register[S](get: ⇒ S, set: S ⇒ Unit, resp: ⇒ Any) {
     val lens = DefLens(() ⇒ get, set, () ⇒ resp)
 
-    def change[T <: Change[S]](name: String)(implicit h: BSONHandler[_ <: BSONValue, T], m: Manifest[T]): Unit = {
+    def change[T <: Change[S]](name: String, async: Boolean = false)(implicit h: BSONHandler[_ <: BSONValue, T], m: Manifest[T]): Unit = {
 
       if (changeEventDefs.contains(name)) {
         throw new RuntimeException(s"You're trying to register event with name `$name`, but it's already registered")
       }
 
       val cd = ChangeWrapper[T#State](
-        name, h, m
+        name, h, m, async
       )
       changeCommandDefs += (cd.manifest → cd.commandDef(lens))
       changeEventDefs += (cd.name → cd.eventDef(lens))
@@ -50,10 +50,11 @@ trait Stateful extends PersistentActor with ActorLogging with Lockable {
           sender() ! changeDef.lens.resp()
         } else {
           val ts = Instant.now()
-          persist(BSONDocument(Traversable(
+          val d = BSONDocument(Traversable(
             changeDef.name → changeDef.handler.asInstanceOf[BSONHandler[_, c.type]].write(c).asInstanceOf[BSONValue],
             TimestampFieldname → BSONDateTime(ts.toEpochMilli)
-          ))) { _ ⇒
+          ))
+          (if(changeDef.async) persistAsync(d) else persist(d)) { _ ⇒
             _timestamp = ts
             changeDef.lens.set(changedState)
             sender() ! changeDef.lens.resp()

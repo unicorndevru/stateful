@@ -18,7 +18,7 @@ private[stateful] case class DefLens[M](get: () ⇒ M, set: M ⇒ Unit, resp: ()
   type State = M
 }
 
-private[stateful] case class ChangeCommandDef[M, T <: Change[M]](lens: DefLens[M], name: String, handler: BSONHandler[_ <: BSONValue, _]) {
+private[stateful] case class ChangeCommandDef[M, T <: Change[M]](lens: DefLens[M], name: String, handler: BSONHandler[_ <: BSONValue, _], async: Boolean) {
   type State = M
   def typed = this.asInstanceOf[ChangeCommandDef[State, Change[State]]]
 }
@@ -30,7 +30,7 @@ private[stateful] case class ChangeEventDef[M, T <: Change[M]](lens: DefLens[M],
   def set: State ⇒ Unit = lens.set
 }
 
-private[stateful] case class ChangeWrapper[M](name: String, handler: BSONHandler[_ <: BSONValue, _], manifest: Manifest[_]) {
-  def commandDef(lens: DefLens[M]): ChangeCommandDef[M, _ <: Change[M]] = ChangeCommandDef(lens, name, handler)
+private[stateful] case class ChangeWrapper[M](name: String, handler: BSONHandler[_ <: BSONValue, _], manifest: Manifest[_], async: Boolean) {
+  def commandDef(lens: DefLens[M]): ChangeCommandDef[M, _ <: Change[M]] = ChangeCommandDef(lens, name, handler, async)
   def eventDef(lens: DefLens[M]): ChangeEventDef[M, _ <: Change[M]] = ChangeEventDef(lens, handler)
 }

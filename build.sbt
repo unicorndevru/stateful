@@ -7,7 +7,7 @@ name := "stateful"
 
 val reactiveMongoVersion = "0.11.9"
 
-val akkaV = "2.4.3"
+val akkaV = "2.4.4"
 
 scalaVersion := "2.11.8"
 
