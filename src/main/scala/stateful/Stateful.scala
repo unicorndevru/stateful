@@ -54,7 +54,7 @@ trait Stateful extends PersistentActor with ActorLogging with Lockable {
             changeDef.name → changeDef.handler.asInstanceOf[BSONHandler[_, c.type]].write(c).asInstanceOf[BSONValue],
             TimestampFieldname → BSONDateTime(ts.toEpochMilli)
           ))
-          (if(changeDef.async) persistAsync(d) else persist(d)) { _ ⇒
+          (if (changeDef.async) persistAsync(d)_ else persist(d)_) { _ ⇒
             _timestamp = ts
             changeDef.lens.set(changedState)
             sender() ! changeDef.lens.resp()
