@@ -7,7 +7,7 @@ name := "stateful"
 
 val reactiveMongoVersion = "0.11.9"
 
-val akkaV = "2.4.6"
+val akkaV = "2.4.8"
 
 scalaVersion := "2.11.8"
 
@@ -47,7 +47,7 @@ lazy val `stateful` = (project in file(".")).settings(commons: _*).settings(
     "com.typesafe.akka" %% "akka-testkit" % akkaV % Test,
     "org.scalatest" %% "scalatest" % "2.2.5" % Test,
     "junit" % "junit" % "4.12" % Test,
-    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "1.50.2" % Test
+    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "1.50.6" % Test
   )
 )
 
