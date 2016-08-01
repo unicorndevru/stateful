@@ -47,7 +47,7 @@ lazy val `stateful` = (project in file(".")).settings(commons: _*).settings(
     "com.typesafe.akka" %% "akka-testkit" % akkaV % Test,
     "org.scalatest" %% "scalatest" % "2.2.5" % Test,
     "junit" % "junit" % "4.12" % Test,
-    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "1.50.6" % Test
+    "de.flapdoodle.embed" % "de.flapdoodle.embed.mongo" % "1.50.5" % Test
   )
 )
 
