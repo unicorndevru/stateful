@@ -41,34 +41,51 @@ trait Stateful extends PersistentActor with ActorLogging with Lockable {
   override def receiveCommand = lockedOr {
     case c: Change[_] if changeCommandDefs.get(manifest[c.type]).nonEmpty ⇒
       log.debug("Received change: {}", c)
+
       val changeDef = changeCommandDefs(manifest[c.type]).asInstanceOf[ChangeCommandDef[c.State, c.type]]
       val state = changeDef.lens.get()
+
       log.debug("Going to check the change...")
+
       // For duplicate idempotent requests, just reply
       if (!c.applyChange.asInstanceOf[PartialFunction[c.State, c.State]].isDefinedAt(state)) {
         log.debug("Duplicate idempotent request received, return: {}", changeDef.lens.resp())
         sender() ! changeDef.lens.resp()
+
       } else {
+
         val changedState = c.applyChange(state).asInstanceOf[c.State]
         log.debug("State changed: {}", changedState)
+
         // If state is not changed, there's no reason to store the event
         if (changedState == state) {
           log.debug("No event is saved, return: {}", changeDef.lens.resp())
           sender() ! changeDef.lens.resp()
+
         } else {
+
           val ts = Instant.now()
           val d = BSONDocument(Traversable(
             changeDef.name → changeDef.handler.asInstanceOf[BSONHandler[_, c.type]].write(c).asInstanceOf[BSONValue],
             TimestampFieldname → BSONDateTime(ts.toEpochMilli)
           ))
+
           log.debug("Going to actually persist an event, async = {}", changeDef.async)
+
           // Actually persisting
           (if (changeDef.async) persistAsync(d)_ else persist(d)_) { _ ⇒
             log.debug("Event persisted, going to change the state")
-            _timestamp = ts
-            changeDef.lens.set(changedState)
-            log.debug("Event persisted, going to reply: {}", changeDef.lens.resp())
-            sender() ! changeDef.lens.resp()
+
+            try {
+              _timestamp = ts
+              changeDef.lens.set(changedState)
+              log.debug("Event persisted, going to reply: {}", changeDef.lens.resp())
+              sender() ! changeDef.lens.resp()
+            } catch {
+              case e: Throwable ⇒
+                log.error(e, "Failed to change a state after persistence")
+                sender() ! Status.Failure(e)
+            }
           }
         }
       }
