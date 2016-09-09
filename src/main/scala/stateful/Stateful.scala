@@ -64,6 +64,7 @@ trait Stateful extends PersistentActor with ActorLogging with Lockable {
           log.debug("Going to actually persist an event, async = {}", changeDef.async)
           // Actually persisting
           (if (changeDef.async) persistAsync(d)_ else persist(d)_) { _ ⇒
+            log.debug("Event persisted, going to change the state")
             _timestamp = ts
             changeDef.lens.set(changedState)
             log.debug("Event persisted, going to reply: {}", changeDef.lens.resp())
@@ -73,7 +74,7 @@ trait Stateful extends PersistentActor with ActorLogging with Lockable {
       }
 
     case c ⇒
-      receiveCustom.applyOrElse(c, {(m: Any) ⇒
+      receiveCustom.applyOrElse(c, { (m: Any) ⇒
         log.debug("Message is not handled: {}", m)
         sender() ! Status.Failure(new IllegalArgumentException("Unknown command: " + c))
       })
