@@ -42,10 +42,12 @@ trait Stateful extends PersistentActor with ActorLogging with Lockable {
     case c: Change[_] if changeCommandDefs.get(manifest[c.type]).nonEmpty ⇒
       val changeDef = changeCommandDefs(manifest[c.type]).asInstanceOf[ChangeCommandDef[c.State, c.type]]
       val state = changeDef.lens.get()
+      // For duplicate idempotent requests, just reply
       if (!c.applyChange.asInstanceOf[PartialFunction[c.State, c.State]].isDefinedAt(state)) {
         sender() ! changeDef.lens.resp()
       } else {
         val changedState = c.applyChange(state).asInstanceOf[c.State]
+        // If state is not changed, there's no reason to store the event
         if (changedState == state) {
           sender() ! changeDef.lens.resp()
         } else {
@@ -54,6 +56,7 @@ trait Stateful extends PersistentActor with ActorLogging with Lockable {
             changeDef.name → changeDef.handler.asInstanceOf[BSONHandler[_, c.type]].write(c).asInstanceOf[BSONValue],
             TimestampFieldname → BSONDateTime(ts.toEpochMilli)
           ))
+          // Actually persisting
           (if (changeDef.async) persistAsync(d)_ else persist(d)_) { _ ⇒
             _timestamp = ts
             changeDef.lens.set(changedState)
