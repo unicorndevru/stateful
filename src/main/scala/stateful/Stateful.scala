@@ -40,15 +40,20 @@ trait Stateful extends PersistentActor with ActorLogging with Lockable {
 
   override def receiveCommand = lockedOr {
     case c: Change[_] if changeCommandDefs.get(manifest[c.type]).nonEmpty ⇒
+      log.debug("Received change: {}", c)
       val changeDef = changeCommandDefs(manifest[c.type]).asInstanceOf[ChangeCommandDef[c.State, c.type]]
       val state = changeDef.lens.get()
+      log.debug("Going to check the change...")
       // For duplicate idempotent requests, just reply
       if (!c.applyChange.asInstanceOf[PartialFunction[c.State, c.State]].isDefinedAt(state)) {
+        log.debug("Duplicate idempotent request received, return: {}", changeDef.lens.resp())
         sender() ! changeDef.lens.resp()
       } else {
         val changedState = c.applyChange(state).asInstanceOf[c.State]
+        log.debug("State changed: {}", changedState)
         // If state is not changed, there's no reason to store the event
         if (changedState == state) {
+          log.debug("No event is saved, return: {}", changeDef.lens.resp())
           sender() ! changeDef.lens.resp()
         } else {
           val ts = Instant.now()
@@ -56,18 +61,22 @@ trait Stateful extends PersistentActor with ActorLogging with Lockable {
             changeDef.name → changeDef.handler.asInstanceOf[BSONHandler[_, c.type]].write(c).asInstanceOf[BSONValue],
             TimestampFieldname → BSONDateTime(ts.toEpochMilli)
           ))
+          log.debug("Going to actually persist an event, async = {}", changeDef.async)
           // Actually persisting
           (if (changeDef.async) persistAsync(d)_ else persist(d)_) { _ ⇒
             _timestamp = ts
             changeDef.lens.set(changedState)
+            log.debug("Event persisted, going to reply: {}", changeDef.lens.resp())
             sender() ! changeDef.lens.resp()
           }
         }
       }
 
     case c ⇒
-      receiveCustom.applyOrElse(c, (_: Any) ⇒
-        sender() ! Status.Failure(new IllegalArgumentException("Unknown command: " + c)))
+      receiveCustom.applyOrElse(c, {(m: Any) ⇒
+        log.debug("Message is not handled: {}", m)
+        sender() ! Status.Failure(new IllegalArgumentException("Unknown command: " + c))
+      })
   }
 
   override def receiveRecover = {
