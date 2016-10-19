@@ -5,9 +5,9 @@ import scalariform.formatter.preferences._
 
 name := "stateful"
 
-val reactiveMongoVersion = "0.11.9"
+val reactiveMongoVersion = "0.11.14"
 
-val akkaV = "2.4.10"
+val akkaV = "2.4.11"
 
 scalaVersion := "2.11.8"
 
@@ -40,7 +40,7 @@ commons
 
 lazy val `stateful` = (project in file(".")).settings(commons: _*).settings(
   libraryDependencies ++= Seq(
-    "com.github.scullxbones" %% "akka-persistence-mongo-rxmongo" % "1.3.0",
+    "com.github.scullxbones" %% "akka-persistence-mongo-rxmongo" % "1.3.4",
     "org.reactivemongo" %% "reactivemongo" % reactiveMongoVersion,
     "com.typesafe.akka" %% "akka-persistence" % akkaV,
     "org.slf4j" % "slf4j-simple" % "1.7.12" % Test,
